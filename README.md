@@ -1,4 +1,4 @@
-# Disclamer #
+# Disclaimer #
 
 ### Forest Pack and Railclone C++ API ###
 
