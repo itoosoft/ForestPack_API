@@ -2,7 +2,7 @@
 
 ### Forest Pack and Railclone C++ API ###
 
-Copyright (c) 2017 iToosoft S.L.
+Copyright (c) 2019 iToosoft S.L.
 
 This API is provided as FREE by Itoosoft S.L. with sole the purporse of integrating RailClone and Forest Pack plugins with 3rd party render engines and third party applications. 
 
