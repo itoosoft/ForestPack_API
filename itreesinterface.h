@@ -14,7 +14,8 @@ HISTORY:	18/07/2009- First Version
 			04/01/2016- CQ - Added forest_openlister
 			06/09/2016- CQ - Added IForestGetRenderDataRaw
 			18/10/2016- CQ - Added IForestVersion
-			25/02/2020- CQ - Added IForestGetRenderMeshes / IForestClearRenderMeshes. Added "tintUVW" to TForestInstance
+			25/02/2020- CQ - Added IForestGetRenderMeshes / IForestClearRenderMeshes. Added "tintUVW" to TForestInstance. API is upgraded to v700.
+			09/12/2020- CQ - Added 'animTime' to TForestInstance. API is upgraded to v701.
 
 	Copyright (c) iToo Software. All Rights Reserved.
 
@@ -206,7 +207,7 @@ b) You renderer is the active production renderer, as returned by GetProductionR
 // Forest Class_ID
 #define TFOREST_CLASS_ID	Class_ID(0x79fe41c2, 0x1d7b4fb1)
 // API Version
-#define TFOREST_API_VERSION			700
+#define TFOREST_API_VERSION			701
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Forest Trees Interface
@@ -244,7 +245,15 @@ class TForestInstanceV512: public TForestInstanceV1
 	};
 
 
-class TForestInstance: public TForestInstanceV512	{};
+class TForestInstanceV701: public TForestInstanceV512
+	{
+	public:
+	TimeValue animTime;								// animation time
+	int reserved[27];								  // reserved for future use
+	};
+
+
+class TForestInstance: public TForestInstanceV701	{};
 
 class TForestRenderMeshV1
 	{
