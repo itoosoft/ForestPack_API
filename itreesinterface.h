@@ -57,6 +57,9 @@ At the rendering loop, repeat for each Forest object:
 	 The returned mesh will hold the geometry for billboards, which are not instantiable. If you want provide support for billboards, render this mesh as a standard object.
 	 Also in case that Display->Render->Mode is set to "Meshes", instead the "Automatic" default value, the mesh will hold the geometry of all Forest items.
 	 (basically this parameter is used to disble the geometry shader of each render engine)
+	 
+	 Note: in Forest 7 and above, GetRenderMesh is used as well to get settings of the render view, from the parameter 'View'. This data is required for the Camera features, as clipping, falloff, etc. 
+	 Please be sure to provide a right value to this parameter. More specifically, Forest checks for projType = PROJ_PERSPECTIVE, worldToView, affineTM and fov values.
 
 
 5) Generate the array of unique meshes and get a pointer to it.
