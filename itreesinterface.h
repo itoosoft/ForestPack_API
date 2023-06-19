@@ -16,6 +16,8 @@ HISTORY:	18/07/2009- First Version
 			18/10/2016- CQ - Added IForestVersion
 			25/02/2020- CQ - Added IForestGetRenderMeshes / IForestClearRenderMeshes. Added "tintUVW" to TForestInstance. API is upgraded to v700.
 			09/12/2020- CQ - Added 'animTime' to TForestInstance. API is upgraded to v701.
+			01/12/2022- CQ - Added support for animated Corona proxies (TForestEngineFeatures::animProxySupport)
+			
 
 	Copyright (c) iToo Software. All Rights Reserved.
 
@@ -32,8 +34,9 @@ The following interface can be used by third party render engines to instantiate
 	Next, following the above code, set the features supported by your engine. See TForestEngineFeatures declaration below for details.
 
 		TForestEngineFeatures engineFeatures;
-		engineFeatures.edgeMode = FALSE;						// set to TRUE if your engine supports IForestGetRenderData
+		engineFeatures.edgeMode = FALSE;						// set to TRUE if engine supports IForestGetRenderData
 		engineFeatures.meshesSupport = FALSE;				// set to TRUE if IForestGetRenderMeshes is supported
+		engineFeatrues.animProxySupport = FALSE;		// set to TRUE if engine supports animated proxies, using TForestInstance::animTime (Corona Renderer only)
 		fpi->IForestSetEngineFeatures((INT_PTR) &engineFeatures);
 
 At the rendering loop, repeat for each Forest object:
@@ -210,7 +213,7 @@ b) You renderer is the active production renderer, as returned by GetProductionR
 // Forest Class_ID
 #define TFOREST_CLASS_ID	Class_ID(0x79fe41c2, 0x1d7b4fb1)
 // API Version
-#define TFOREST_API_VERSION			701
+#define TFOREST_API_VERSION			807
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Forest Trees Interface
@@ -296,7 +299,7 @@ class TForestRenderDataRawElm: public TForestRenderDataRawElmV1 {};
 class TForestRenderDataRawV1
 	{
 	public:
-	int meshSampleID;					// mesh sample ID
+	unsigned int meshSampleID;					// mesh sample ID
 	unsigned int numFaces;		// number of faces of mesh sample
 	MaxSDK::Array<unsigned int> elmIdxByFace; // index of element by face index
 	MaxSDK::Array<TForestRenderDataRawElm> elmData;		// data by element
@@ -314,9 +317,10 @@ class TForestEngineFeatures
 	int forestAPIversion;			// after calling to IForestSetEngineFeatures, this value returns API version from the Forest side. Use it from renderer to check API compatibility.
 														//   Note: in FP 5.1.2 and older, forestAPIversion was not implemented and therefore value is not modified (0 by default).
 	BOOL meshesSupport;				// true if renderer handles the meshes returned by IForestGetRenderMeshes
-	int reserved[3];
+	BOOL animProxySupport;		// true if renderer handles animated proxies (Corona Renderer only)
+	int reserved[2];
 
-	void init() { renderAPIversion = TFOREST_API_VERSION; edgeMode = meshesSupport = FALSE; forestAPIversion = reserved[1] = reserved[0] = 0; }
+	void init() { renderAPIversion = TFOREST_API_VERSION; edgeMode = meshesSupport = animProxySupport = FALSE; forestAPIversion = reserved[1] = reserved[0] = 0; }
 	TForestEngineFeatures() { init(); }
 	};
 
