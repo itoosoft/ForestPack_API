@@ -17,13 +17,13 @@ HISTORY:	18/07/2009- First Version
 			25/02/2020- CQ - Added IForestGetRenderMeshes / IForestClearRenderMeshes. Added "tintUVW" to TForestInstance. API is upgraded to v700.
 			09/12/2020- CQ - Added 'animTime' to TForestInstance. API is upgraded to v701.
 			01/12/2022- CQ - Added support for animated Corona proxies (TForestEngineFeatures::animProxySupport)
+			06/11/2023- CQ - Added support for ForestIvy (see notes at end).
 			
-
 	Copyright (c) iToo Software. All Rights Reserved.
 
 ************************************************************************
 
-The following interface can be used by third party render engines to instantiate the Forest items, in the following way:
+The following interface can be used by third party render engines to instantiate Forest and ForestIvy items, in the following way:
 
 1) Using the static ForestPack interface, Register the current render engine as supported for instancing.
    Strictly, this funcion only need to be inkoked one time by Max session, but it's ok if you call it more times:
@@ -35,11 +35,12 @@ The following interface can be used by third party render engines to instantiate
 
 		TForestEngineFeatures engineFeatures;
 		engineFeatures.edgeMode = FALSE;						// set to TRUE if engine supports IForestGetRenderData
-		engineFeatures.meshesSupport = FALSE;				// set to TRUE if IForestGetRenderMeshes is supported
+		engineFeatures.meshesSupport = TRUE;				// set to FALSE if IForestGetRenderMeshes is not supported from your engine.
 		engineFeatrues.animProxySupport = FALSE;		// set to TRUE if engine supports animated proxies, using TForestInstance::animTime (Corona Renderer only)
+		engineFeatrues.ivySupport = TRUE;						// only if you are going to support ForestIvy objects.
 		fpi->IForestSetEngineFeatures((INT_PTR) &engineFeatures);
 
-At the rendering loop, repeat for each Forest object:
+At the rendering loop, repeat for each Forest and ForestIvy object (use 'TFOREST_CLASS_ID' and 'FIVY_CLASS_ID' for Class IDs).
 
 2) Get a pointer to the ITreesInterface interface:
 
@@ -202,6 +203,22 @@ a) Your renderer is registered with IForestRegisterEngine and IForestSetEngineFe
 b) You renderer is the active production renderer, as returned by GetProductionRenderer(). 
 	 If necessary, you can set the production renderer before using these functions, and restore it once called.
 
+************************************************************************
+
+ForestIvy support.
+
+Forest Pack 9.0 includes ForestIvy, a new plugin to create Ivy plants.
+To support it easily from your render engine, we used the same interface from Forest. Anyway, some changes are required:
+
+a) Check for objects with 'FIVY_CLASS_ID' class ID.
+b) Set TForestEngineFeatures::ivySupport = TRUE and TForestEngineFeatures::meshesSupport = TRUE, when calling to 'IForestSetEngineFeatures'.
+c) You must support 'IForestGetRenderMeshes' and 'IForestClearRenderMeshes' (see point 5), because ForestIvy provides instances to meshes, not to INodes as Forest.
+d) It's not necessary to call to GetRenderMesh.
+e) Use 'TForestInstance::mesh' to get a pointer to the mesh instance. Please note that 'TForestInstance::node' always is null for Ivy instances.
+
+Besides that, the instancing procedure is identical to Forest. Also features specific from Forest as Tint Color, Edge Mode, etc. are not used.
+	 
+
 *************************************************************************/
 
 #ifndef __TREESINTERFACE__H
@@ -212,6 +229,9 @@ b) You renderer is the active production renderer, as returned by GetProductionR
 
 // Forest Class_ID
 #define TFOREST_CLASS_ID	Class_ID(0x79fe41c2, 0x1d7b4fb1)
+// ForestIvy Class_ID
+#define FIVY_CLASS_ID	Class_ID(0x549c7f30, 0x3a0c0561)
+
 // API Version
 #define TFOREST_API_VERSION			807
 
@@ -318,9 +338,10 @@ class TForestEngineFeatures
 														//   Note: in FP 5.1.2 and older, forestAPIversion was not implemented and therefore value is not modified (0 by default).
 	BOOL meshesSupport;				// true if renderer handles the meshes returned by IForestGetRenderMeshes
 	BOOL animProxySupport;		// true if renderer handles animated proxies (Corona Renderer only)
-	int reserved[2];
+	BOOL ivySupport;					// true if renderer supports ForestIvy
+	int reserved[1];
 
-	void init() { renderAPIversion = TFOREST_API_VERSION; edgeMode = meshesSupport = animProxySupport = FALSE; forestAPIversion = reserved[1] = reserved[0] = 0; }
+	void init() { renderAPIversion = TFOREST_API_VERSION; edgeMode = meshesSupport = animProxySupport = ivySupport = FALSE; forestAPIversion = reserved[0] = 0; }
 	TForestEngineFeatures() { init(); }
 	};
 
